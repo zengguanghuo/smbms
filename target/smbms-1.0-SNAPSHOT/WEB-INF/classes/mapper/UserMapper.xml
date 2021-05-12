@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smbms.mapper.UserMapper">
+    <resultMap id="UserList" type="com.smbms.eneity.User">
+
+        <result property="id" column="id"></result>
+        <result property="userCode" column="userCode"></result>
+        <result property="userName" column="userName"></result>
+        <result property="userPassword" column="userPassword"></result>
+        <result property="gender" column="gender"></result>
+        <result property="birthday" column="birthday"></result>
+        <result property="phone" column="phone"></result>
+        <result property="address" column="address"></result>
+        <result property="userRole" column="userRole"></result>
+        <result property="createdBy" column="createdBy"></result>
+        <result property="creationDate" column="creationDate"></result>
+        <result property="modifyBy" column="modifyBy"></result>
+        <result property="modifyDate" column="modifyDate"></result>
+        <association property="role" javaType="com.smbms.eneity.Role">
+            <result property="roleName" column="roleName"></result>
+        </association>
+    </resultMap>
+    <select id="select" resultMap="UserList">
+        SELECT t1.*,t2.roleName FROM smbms_user t1
+                                         INNER JOIN smbms_role t2 ON t1.userRole=t2.id;
+    </select>
+    <select id="seuser" resultType="com.smbms.eneity.User">
+        SELECT * FROM `smbms_user` WHERE userCode=#{names} AND userPassword=#{pwd}
+    </select>
+    <update id="update">
+        UPDATE smbms_user SET userPassword=#{userPassword} where id=#{id}
+    </update>
+    <insert id="add">
+        insert into smbms_user (userCode,userName,userPassword,gender,
+                                birthday,phone,address,userRole,createdBy,creationDate,modifyBy,modifyDate,idPicPath)
+        values (#{userCode},#{userName},#{userPassword},#{gender},
+                #{birthday},#{phone},#{address},#{userRole},#{createdBy},#{creationDate},#{modifyBy},#{modifyDate},#{idPicPath});
+    </insert>
+
+    <select id="getUserCode" resultType="com.smbms.eneity.User">
+        SELECT * FROM `smbms_user` WHERE userCode=#{userCode}
+    </select>
+<select id="mohuser" resultType="com.smbms.eneity.User" resultMap="UserList">
+    SELECT *  FROM `smbms_user`,`smbms_role`
+    <where>
+        smbms_user.`userRole`=smbms_role.`id`
+    <if test='userName!=null and userName!=""'>
+       and smbms_user.userName LIKE CONCAT('%',#{userName},'%')
+    </if>
+    <if test="userRole!=null and userRole!=0">
+        AND  smbms_user.userRole=#{userRole}
+    </if>
+</where>
+</select>
+
+    <select id="getbyid" resultMap="UserList">
+        SELECT t1.*,t2.roleName FROM smbms_user t1
+                                         INNER JOIN smbms_role t2 ON t1.userRole=t2.id AND t1.id=#{uid}
+    </select>
+
+    <update id="updateuser">
+        UPDATE smbms_user SET userPassword=#{userPassword} where id=#{id}
+    </update>
+
+    <update id="userUpate">
+        update smbms_user
+        <set>
+        <if test="userCode !=null">userCode=#{userCode},</if>
+        <if test="userName !=null">userName=#{userName},</if>
+        <if test="userPassword !=null">userPassword=#{userPassword}, </if>
+        <if test="gender !=null">gender=#{gender},</if>
+        <if test="birthday !=null">  birthday=#{birthday}, </if>
+        <if test="phone !=null">phone=#{phone}, </if>
+        <if test="address !=null">address=#{address},</if>
+        <if test="userRole !=null">userRole=#{userRole},</if>
+        <if test="createdBy !=null">createdBy=#{createdBy},</if>
+        <if test="creationDate !=null">creationDate=#{creationDate},</if>
+        <if test="modifyBy !=null">modifyBy=#{modifyBy},</if>
+        <if test="modifyDate !=null">modifyDate=#{modifyDate}</if>
+        </set>
+        where id=#{id}
+    </update>
+
+</mapper>

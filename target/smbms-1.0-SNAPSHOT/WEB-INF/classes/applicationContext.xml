@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+<import resource="dispatcher-servlet.xml"/>
+
+    <context:component-scan base-package="com.smbms"></context:component-scan>
+    <aop:aspectj-autoproxy/>
+    <!--引入properties文件-->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location">
+            <value>classpath:db.properties</value>
+        </property>
+    </bean>
+    <!--1 c3p0数据源的配置-->
+
+    <!--数据源配置-->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${driver}"></property>
+        <property name="jdbcUrl" value="${url}"></property>
+        <property name="user" value="${user}"></property>
+        <property name="password" value="${password}"></property>
+    </bean>
+    <!--2 SqlSessionFactoryBean配置,提供SqlSession对象-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"></property>
+        <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+        <property name="mapperLocations" value="classpath*:mapper/*.xml"></property>
+    </bean>
+    <!--3 SqlSessionTemplate负责管理SqlSession-->
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactory"></constructor-arg>
+    </bean>
+
+    <!--4 配置Mapper实现-->
+    <!-- 使用 MapperScannerConfigurer根据指定包批量扫描Mapper接口并生成实例-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.smbms.mapper"></property>
+    </bean>
+
+<!--开启注解事物-->
+    <tx:annotation-driven transaction-manager="txManager"></tx:annotation-driven>
+<!--    定义事务管理-->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+
+<!--    &lt;!&ndash; 2. 配置事务属性 &ndash;&gt;-->
+<!--    &lt;!&ndash;<tx:advice>元素声明事务通知&ndash;&gt;-->
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <!-- 根据方法名指定事务的属性 -->
+            <tx:method name="*"/>
+            <!--propagation配置事务传播行为-->
+            <tx:method name="purchase" propagation="REQUIRES_NEW"/>
+            <!--isolation配置事务的隔离级别-->
+            <tx:method name="update*" isolation="SERIALIZABLE"/>
+            <!--rollback-for配置事务遇到异常必须回滚，no-rollback-for配置事务遇到异常必须不能回滚-->
+            <tx:method name="add*" rollback-for="java.io.IOException" no-rollback-for="com.dmsd.spring.tx.BookStockException"/>
+            <!--read-only配置事务只读属性-->
+            <tx:method name="find*" read-only="true"/>
+            <!--timeout配置事务的超时属性-->
+            <tx:method name="get*" timeout="3"/>
+        </tx:attributes>
+    </tx:advice>
+
+<!--    &lt;!&ndash; 3. 配置事务切入点, 以及把事务切入点和事务属性关联起来 &ndash;&gt;-->
+<!--    <aop:config>-->
+<!--        <aop:pointcut expression="execution(* com.bdqn.Service.*.*(..))"-->
+<!--                      id="txPointCut"/>-->
+<!--        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut"/>-->
+<!--    </aop:config>-->
+
+</beans>

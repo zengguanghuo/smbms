@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smbms.mapper.ProviderMapper">
+    <select id="select" resultType="com.smbms.eneity.Provider">
+        SELECT * FROM `smbms_provider`
+    </select>
+    <insert id="add" parameterType="com.smbms.eneity.Provider">
+        insert into smbms_provider (id,proCode,proName,proDesc,proContact,proPhone,proAddress,proFax,createdBy,creationDate,modifyDate,modifyBy)
+        values (#{id},#{proCode},#{proName},#{proDesc},#{proContact},#{proPhone},#{proAddress},
+                #{proFax},#{createdBy},#{creationDate},#{modifyDate},#{modifyBy})
+    </insert>
+
+    <select id="getbyid" resultType="com.smbms.eneity.Provider">
+        SELECT * FROM `smbms_provider` WHERE id=#{id}
+    </select>
+
+    <delete id="delect">
+        DELETE  FROM `smbms_provider` WHERE id=#{id}
+    </delete>
+
+    <select id="mohu" resultType="com.smbms.eneity.Provider">
+        SELECT * FROM `smbms_provider`
+        <where>
+            <if test="proCode!=null and proCode!=''">
+                proCode=#{proCode}
+            </if>
+            <if test="proName!=null and proName!=''">
+                AND proName LIKE CONCAT('%',#{proName},'%')
+            </if>
+        </where>
+    </select>
+</mapper>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smbms.mapper.BillMapper">
+    <resultMap id="bill" type="com.smbms.eneity.Bill">
+        <id property="id" column="id"/>
+        <result property="providerId" column="providerId"></result>
+        <association property="provider" javaType="com.smbms.eneity.Provider">
+            <id property="id" column="pid"/>
+            <result property="proName" column="proName"/>
+        </association>
+    </resultMap>
+
+
+    <select id="select" resultMap="bill">
+        SELECT smbms_bill.*, smbms_provider.`id` AS pid,smbms_provider.proName FROM
+        `smbms_bill`,`smbms_provider`
+        <where>
+         smbms_bill.`providerId`=smbms_provider.`id`
+        <if test="productName!=null and productName!=''">
+            AND smbms_bill.`productName` LIKE CONCAT('%',#{productName},'%')
+        </if>
+        <if test="providerId!=0 and providerId!=null" >
+            AND  smbms_provider.`id`=#{providerId}
+        </if>
+       <if test="isPayment!=0">
+           AND  smbms_bill.`isPayment`=#{isPayment}
+       </if>
+        </where>
+    </select>
+
+    <select id="getbise" resultMap="bill" resultType="com.smbms.eneity.Bill">
+        SELECT smbms_bill.*, smbms_provider.`id` AS pid,smbms_provider.proName FROM `smbms_bill`,`smbms_provider`
+where smbms_bill.`providerId`=smbms_provider.`id`
+    </select>
+    
+    <select id="getbyID" resultMap="bill">
+        SELECT * FROM `smbms_bill`,`smbms_provider`
+        WHERE smbms_bill.`providerId`=smbms_provider.`id`
+          AND `smbms_bill`.`id`=#{id}
+    </select>
+
+
+    <delete id="delect">
+        DELETE FROM `smbms_bill` WHERE id=#{id}
+    </delete>
+
+    <insert id="add">
+        insert into smbms_bill (id,billCode,productName,productDesc,productUnit,productCount,totalPrice,isPayment,createdBy,creationDate,modifyBy,modifyDate,providerId)
+        values (#{id},#{billCode},#{productName},#{productDesc},#{productUnit},#{productCount},
+                #{totalPrice},#{isPayment},#{createdBy},#{creationDate},#{modifyBy},#{modifyDate},#{providerId})
+
+    </insert>
+    <select id="getlCode" resultType="com.smbms.eneity.Bill">
+        SELECT * FROM `smbms_bill` WHERE  billCode =#{billCode}
+    </select>
+</mapper>
