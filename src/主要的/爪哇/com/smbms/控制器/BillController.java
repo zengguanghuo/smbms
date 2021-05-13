@@ -43,7 +43,7 @@ public class BillController {
         return "billlist";
     }
 
-    //模糊查询
+    //模糊查询666
     @RequestMapping("billvi.do")
     public String ck(Model model,Integer bid){
         System.out.println(bid);
